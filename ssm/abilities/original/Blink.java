@@ -52,7 +52,10 @@ public class Blink extends Ability implements OwnerRightClickEvent {
         // Check if the entity is an opponent and within 2 blocks of the destination
         if (entity != owner && entity.getLocation().distance(destination) <= 2) {
             // Apply damage to the opponent
-            entity.damage(5); // Adjust the damage value as needed
+        SmashDamageEvent smashDamageEvent = new SmashDamageEvent(hit, owner, strike_damage);
+        smashDamageEvent.setIgnoreDamageDelay(true);
+        smashDamageEvent.setReason(name);
+        smashDamageEvent.callEvent();
         }
     }
 }
