@@ -33,15 +33,26 @@ public class Blink extends Ability implements OwnerRightClickEvent {
     }
 
     public void activate() {
-        LineParticle lineParticle = new LineParticle(owner.getEyeLocation(), owner.getLocation().getDirection(),
-                0.2f, range, EnumParticle.SMOKE_NORMAL, owner.getWorld().getPlayers());
-        while (!lineParticle.update()) { }
-        Utils.playFirework(owner.getEyeLocation(), FireworkEffect.Type.BALL, Color.BLACK, false, false);
-        owner.playSound(owner.getLocation(), Sound.ENDERMAN_TELEPORT, 1f, 1f);
-        owner.teleport(lineParticle.getDestination().add(0, 0.4, 0));
-        owner.setFallDistance(0);
-        owner.playSound(owner.getLocation(), Sound.ENDERMAN_TELEPORT, 1f, 1f);
-        Utils.playFirework(owner.getEyeLocation(), FireworkEffect.Type.BALL, Color.BLACK, false, false);
-    }
+    LineParticle lineParticle = new LineParticle(owner.getEyeLocation(), owner.getLocation().getDirection(),
+            0.2f, range, EnumParticle.SMOKE_NORMAL, owner.getWorld().getPlayers());
+    while (!lineParticle.update()) { }
 
+    // Store the destination location after teleportation
+    Location destination = lineParticle.getDestination().add(0, 0.4, 0);
+
+    Utils.playFirework(owner.getEyeLocation(), FireworkEffect.Type.BALL, Color.BLACK, false, false);
+    owner.playSound(owner.getLocation(), Sound.ENDERMAN_TELEPORT, 1f, 1f);
+
+    // Teleport the owner
+    owner.teleport(destination, PlayerTeleportEvent.TeleportCause.PLUGIN);
+    owner.setFallDistance(0);
+
+    // Damage nearby opponents
+    for (LivingEntity entity : owner.getWorld().getLivingEntities()) {
+        // Check if the entity is an opponent and within 2 blocks of the destination
+        if (entity != owner && entity.getLocation().distance(destination) <= 2) {
+            // Apply damage to the opponent
+            entity.damage(5); // Adjust the damage value as needed
+        }
+    }
 }
